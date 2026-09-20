@@ -14,27 +14,63 @@
         android:textColor="#FFFFFF"
         android:textSize="26sp"
         android:textStyle="bold"
-        android:layout_marginBottom="32dp" />
+        android:layout_marginBottom="24dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="كم ساعة تريد أن تنام بعد أن تغفو؟"
+        android:text="حدد مدة النوم بعد الغفوة:"
         android:textColor="#BBBBBB"
         android:textSize="16sp"
-        android:layout_marginBottom="12dp" />
+        android:layout_marginBottom="16dp" />
 
-    <EditText
-        android:id="@+id/etHours"
-        android:layout_width="120dp"
+    <!-- صف لاختيار الساعات والدقائق -->
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
-        android:text="3"
-        android:gravity="center"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#4CAF50"
-        android:textSize="22sp"
-        android:layout_marginBottom="24dp" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="28dp">
+
+        <EditText
+            android:id="@+id/etHours"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:text="3"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#4CAF50"
+            android:textSize="22sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ساعة"
+            android:textColor="#DDDDDD"
+            android:textSize="16sp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp" />
+
+        <EditText
+            android:id="@+id/etMinutes"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:text="0"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#4CAF50"
+            android:textSize="22sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="دقيقة"
+            android:textColor="#DDDDDD"
+            android:textSize="16sp"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/btnStart"
@@ -51,8 +87,8 @@
         android:layout_height="wrap_content"
         android:text="الحالة: متوقف"
         android:textColor="#888888"
-        android:textSize="16sp"
-        android:layout_marginTop="32dp"
+        android:textSize="15sp"
+        android:layout_marginTop="28dp"
         android:gravity="center" />
 
 </LinearLayout>
