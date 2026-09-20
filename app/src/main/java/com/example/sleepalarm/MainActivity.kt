@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var tvStatus: TextView
     private lateinit var etHours: EditText
+    private lateinit var etMinutes: EditText
     private lateinit var btnStart: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,18 +34,27 @@ class MainActivity : AppCompatActivity() {
 
         tvStatus = findViewById(R.id.tvStatus)
         etHours = findViewById(R.id.etHours)
+        etMinutes = findViewById(R.id.etMinutes)
         btnStart = findViewById(R.id.btnStart)
 
         requestNeededPermissions()
 
         btnStart.setOnClickListener {
-            val hours = etHours.text.toString().toDoubleOrNull() ?: 3.0
+            val hours = etHours.text.toString().toIntOrNull() ?: 0
+            val minutes = etMinutes.text.toString().toIntOrNull() ?: 0
+            val totalMinutes = (hours * 60) + minutes
+
+            if (totalMinutes <= 0) {
+                Toast.makeText(this, "يرجى إدخال مدة صحيحة", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val sharedPref = getSharedPreferences("AlarmPrefs", Context.MODE_PRIVATE)
-            sharedPref.edit().putFloat("target_hours", hours.toFloat()).apply()
+            sharedPref.edit().putInt("target_minutes", totalMinutes).apply()
 
             startSleepTracking()
-            tvStatus.text = "الحالة: جاري انتظار استغراقك في النوم..."
-            Toast.makeText(this, "تم بدء المراقبة بنجاح", Toast.LENGTH_SHORT).show()
+            tvStatus.text = "الحالة: بانتظار استشعار النوم من الساعة والحساسات..."
+            Toast.makeText(this, "تم بدء المراقبة: $hours س و $minutes د", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -82,7 +92,6 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-// مستقبل إشارات النوم من حساسات النظام
 class SleepReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (SleepClassifyEvent.hasEvents(intent)) {
@@ -91,11 +100,10 @@ class SleepReceiver : BroadcastReceiver() {
                 // التأكد من النوم بنسبة ثقة أعلى من 70%
                 if (event.confidence >= 70) {
                     val sharedPref = context.getSharedPreferences("AlarmPrefs", Context.MODE_PRIVATE)
-                    val hours = sharedPref.getFloat("target_hours", 3.0f)
+                    val totalMinutes = sharedPref.getInt("target_minutes", 180)
                     
-                    scheduleAlarm(context, hours)
+                    scheduleAlarm(context, totalMinutes)
                     
-                    // إيقاف التتبع بعد تأكيد النوم لتوفير البطارية
                     val pIntent = PendingIntent.getBroadcast(
                         context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
                     )
@@ -106,9 +114,9 @@ class SleepReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun scheduleAlarm(context: Context, hours: Float) {
+    private fun scheduleAlarm(context: Context, totalMinutes: Int) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val triggerTime = System.currentTimeMillis() + (hours * 60 * 60 * 1000).toLong()
+        val triggerTime = System.currentTimeMillis() + (totalMinutes * 60 * 1000L)
 
         val alarmIntent = Intent(context, AlarmTriggerReceiver::class.java).let {
             PendingIntent.getBroadcast(context, 102, it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
@@ -122,7 +130,6 @@ class SleepReceiver : BroadcastReceiver() {
     }
 }
 
-// مستقبل إطلاق التنبيه والصوت
 class AlarmTriggerReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
